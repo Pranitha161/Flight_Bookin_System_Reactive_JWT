@@ -1,25 +1,23 @@
 package com.flightapp.demo.service;
 
 import org.springframework.http.ResponseEntity;
-
 import com.flightapp.demo.entity.LoginRequest;
 import com.flightapp.demo.entity.User;
+import reactor.core.publisher.Mono;
 
 public interface UserService {
-	ResponseEntity<User> addUser(User user);
 
-	ResponseEntity<String> login(LoginRequest loginRequest);
+	Mono<ResponseEntity<User>> addUser(User user);
 
-//	Claims validate(String token);
+	Mono<ResponseEntity<String>> login(LoginRequest loginRequest);
 
-	ResponseEntity<User> getPassengerById(String passengerId);
+	Mono<ResponseEntity<User>> getPassengerById(String passengerId);
 
-	ResponseEntity<User> getPassengerByEmail(String email);
+	Mono<ResponseEntity<User>> getPassengerByEmail(String email);
 
-	ResponseEntity<User> updateById(String id, User passenger);
+	Mono<ResponseEntity<User>> updateById(String id, User passenger);
 
-	ResponseEntity<String> deleteById(String passengerId);
+	Mono<ResponseEntity<String>> deleteById(String passengerId);
 
-	ResponseEntity<String> logout(String token);
-
+	Mono<ResponseEntity<String>> logout(String token);
 }
