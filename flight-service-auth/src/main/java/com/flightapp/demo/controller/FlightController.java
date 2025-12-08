@@ -27,7 +27,11 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/flight")
 public class FlightController {
 	private final FlightService flightService;
-
+	 @GetMapping("/ping")
+	    public String ping() {
+	        System.out.println(">>> Flight Service ping hit");
+	        return "pong";
+	    }
 	@PostMapping("/search")
 	public Mono<ResponseEntity<List<Flight>>> searchFlight(@Valid @RequestBody SearchRequest searchRequest,
 			@RequestHeader("X-Roles") String roles) {

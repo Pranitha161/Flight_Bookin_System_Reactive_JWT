@@ -25,6 +25,11 @@ import reactor.core.publisher.Mono;
 public class UserController {
 
 	private final UserServiceImplementation userService;
+	@GetMapping("/ping")
+    public String ping() {
+        System.out.println(">>> Ping endpoint hit");
+        return "pong";
+    }
 
 	@PostMapping("/signup")
 	public Mono<ResponseEntity<String>> signup(@Valid @RequestBody User user) {
@@ -39,6 +44,7 @@ public class UserController {
 	@GetMapping("/get/{passengerId}")
 	public Mono<ResponseEntity<User>> getPassengers(@RequestHeader("X-User-Id") String userId,
 			@RequestHeader("X-Roles") String roles, @PathVariable String passengerId) {
+		System.out.println(roles);
 		if (!userId.equals(passengerId) && !roles.contains("ROLE_ADMIN")) {
 			return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
 		}
