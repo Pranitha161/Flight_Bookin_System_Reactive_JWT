@@ -37,8 +37,12 @@ public class SeatController {
 	}
 
 	@PutMapping("/flights/{id}/seats")
-	public ResponseEntity<Void> updateSeats(@PathVariable String id, @RequestBody List<Seat> seats) {
-		boolean updated = seatService.updateSeats(id, seats);
-		return updated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+	public Mono<ResponseEntity<Void>> updateSeats(@PathVariable String id, @RequestBody List<Seat> seats) {
+	    return seatService.updateSeats(id, seats)
+	        .map(updated -> updated 
+	            ? ResponseEntity.ok().<Void>build() 
+	            : ResponseEntity.notFound().build()
+	        );
 	}
+
 }
