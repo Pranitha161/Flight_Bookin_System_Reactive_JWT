@@ -1,8 +1,10 @@
 package com.flightapp.demo.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,12 +24,18 @@ public class AirLineController {
 	private final AirLineService airlineService;
 
 	@GetMapping("/get")
-	public Flux<AirLine> getAirlines() {
+	public Flux<AirLine> getAirlines(@RequestHeader("X-Roles") String roles) {
+		if (!roles.contains("ROLE_ADMIN")) {
+			return Flux.error(new RuntimeException("Forbidden"));
+		}
 		return airlineService.getAllAirlines();
 	}
 
 	@GetMapping("/get/{id}")
-	public Mono<ResponseEntity<AirLine>> getAirlineById(@Valid @PathVariable String id) {
+	public Mono<ResponseEntity<AirLine>> getAirlineById(@RequestHeader("X-Roles") String roles,@Valid @PathVariable String id) {
+		if (!roles.contains("ROLE_ADMIN")) {
+			return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+		}
 		return airlineService.getById(id);
 	}
 

@@ -21,9 +21,9 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class FlightServiceImplementation implements FlightService {
-	private FlightRepository flightRepo;
-	private AirLineRepository airlineRepo;
-	private SeatService seatService;
+	private final FlightRepository flightRepo;
+	private final AirLineRepository airlineRepo;
+	private final SeatService seatService;
 	private final AirLineService airlineService;
 
 	@Override
