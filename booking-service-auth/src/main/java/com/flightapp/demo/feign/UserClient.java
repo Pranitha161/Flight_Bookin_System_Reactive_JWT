@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.flightapp.demo.config.FeignConfig;
 import com.flightapp.demo.entity.User;
 
-@FeignClient(name = "user-service-auth", configuration = FeignConfig.class)
+@FeignClient(name = "user-service-auth")
 public interface UserClient {
 	@GetMapping("/auth/get/{passengerId}")
 	ResponseEntity<User> getPassengers(@PathVariable String passengerId);

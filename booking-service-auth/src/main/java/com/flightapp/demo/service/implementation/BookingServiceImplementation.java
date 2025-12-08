@@ -47,10 +47,10 @@ public class BookingServiceImplementation implements BookingService {
 	}
 
 	@CircuitBreaker(name = "flightServiceCircuitBreaker", fallbackMethod = "fallbackDeleteBooking")
-	public Mono<ResponseEntity<String>> deleteBookingByPnr(String pnr) {
+	public Mono<ResponseEntity<String>> deleteBookingByPnr(String pnr, String roles) {
 
 		return bookingRepo.findByPnr(pnr)
-				.flatMap(booking -> flightClient.getFlight(booking.getFlightId()).flatMap(flightResp -> {
+				.flatMap(booking -> flightClient.getFlight(booking.getFlightId(), roles).flatMap(flightResp -> {
 					Flight flight = flightResp.getBody();
 					if (flight == null) {
 						return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -65,7 +65,7 @@ public class BookingServiceImplementation implements BookingService {
 						return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
 								.body("Cannot delete booking within 24 hours of departure for PNR: " + pnr));
 					}
-					return flightClient.getSeatsByFlightId(booking.getFlightId()).flatMap(seatResp -> {
+					return flightClient.getSeatsByFlightId(booking.getFlightId(), roles).flatMap(seatResp -> {
 						List<Seat> seats = seatResp.getBody();
 						if (seats == null) {
 							return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -78,8 +78,8 @@ public class BookingServiceImplementation implements BookingService {
 
 						flight.setAvailableSeats(flight.getAvailableSeats() + seatNumbers.size());
 
-						return flightClient.updateFlight(flight.getId(), flight)
-								.then(Mono.fromCallable(() -> flightClient.updateSeats(flight.getId(), seats)))
+						return flightClient.updateFlight(flight.getId(), flight, roles)
+								.then(Mono.fromCallable(() -> flightClient.updateSeats(flight.getId(), seats, roles)))
 								.then(bookingRepo.delete(booking))
 								.then(Mono.fromRunnable(() -> eventProducer.bookingDeleted(booking)))
 								.thenReturn(ResponseEntity
@@ -98,28 +98,26 @@ public class BookingServiceImplementation implements BookingService {
 	}
 
 	@CircuitBreaker(name = "flightServiceCircuitBreaker", fallbackMethod = "fallbackGetFlight")
-	public Mono<ResponseEntity<String>> bookTicket(String flightId, Booking booking) {
+	public Mono<ResponseEntity<String>> bookTicket(String flightId, Booking booking, String roles) {
 		final List<String> seatReq = booking.getSeatNumbers();
 		if (seatReq == null || seatReq.isEmpty()) {
 			return Mono.just(ResponseEntity.badRequest().body("No seats requested"));
 		}
 		ResponseEntity<User> userByEmailResp = userClient.getPassenger(booking.getEmail());
-	    if (!userByEmailResp.getStatusCode().is2xxSuccessful() || userByEmailResp.getBody() == null) {
-	        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body("Invalid email"));
-	    }
-	    List<User> users = userClient.getUsersByIds(booking.getUserIds());
-	    if (users == null || users.size() != booking.getUserIds().size()) {
-	        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body("One or more passenger IDs are invalid"));
-	    }
-		return flightClient.getFlight(flightId).flatMap(flightResp -> {
+		if (!userByEmailResp.getStatusCode().is2xxSuccessful() || userByEmailResp.getBody() == null) {
+			return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid email"));
+		}
+		List<User> users = userClient.getUsersByIds(booking.getUserIds());
+		if (users == null || users.size() != booking.getUserIds().size()) {
+			return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("One or more passenger IDs are invalid"));
+		}
+		return flightClient.getFlight(flightId, roles).flatMap(flightResp -> {
 			Flight flight = flightResp.getBody();
 			if (flight == null) {
 				return Mono.just(
 						ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight not found with id: " + flightId));
 			}
-			return flightClient.getSeatsByFlightId(flightId).flatMap(seatsResp -> {
+			return flightClient.getSeatsByFlightId(flightId, roles).flatMap(seatsResp -> {
 				List<Seat> seats = seatsResp.getBody();
 				if (seats == null) {
 					return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -146,8 +144,8 @@ public class BookingServiceImplementation implements BookingService {
 				}
 				flight.setAvailableSeats(newAvailable);
 				return bookingRepo.save(booking)
-						.then(Mono.fromCallable(() -> flightClient.updateFlight(flightId, flight)))
-						.then(Mono.fromCallable(() -> flightClient.updateSeats(flightId, seats)))
+						.then(Mono.fromCallable(() -> flightClient.updateFlight(flightId, flight, roles)))
+						.then(Mono.fromCallable(() -> flightClient.updateSeats(flightId, seats, roles)))
 						.then(Mono.fromRunnable(() -> eventProducer.bookingCreated(booking)))
 						.thenReturn(ResponseEntity.status(HttpStatus.CREATED)
 								.body("Booking created successfully with PNR: " + booking.getPnr()));
