@@ -5,11 +5,12 @@ import java.util.List;
 import com.flightapp.demo.entity.Seat;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface SeatService {
-	List<Seat> initialiszeSeats(String flightId, int rows, int cols);
+	Mono<Void> initialiszeSeats(String flightId, int rows, int cols);
 
-	boolean updateSeats(String flightId, List<Seat> seats);
+	Mono<Boolean> updateSeats(String flightId, List<Seat> seats);
 
 	Flux<Seat> getSeatsByFlightId(String flightId);
 }
