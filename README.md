@@ -79,8 +79,9 @@ This project is a scalable, modular flight booking system built using Spring Boo
 - **Docker + Docker Compose** – containerization and orchestration for all services
 
 ---
+## System Workflow
 
-
+![Architecture Diagram](image.png)
 
 
 
