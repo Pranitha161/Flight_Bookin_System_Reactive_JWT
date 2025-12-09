@@ -1,6 +1,5 @@
 # Flight Booking System – Dockerized Microservices Architecture
 
-## Overview
 This project is a scalable, modular flight booking system built using Spring Boot microservices. It demonstrates centralized authentication, role-based access control (RBAC), service discovery, and inter-service communication using Feign clients and Kafka.
 
 ---
@@ -31,31 +30,21 @@ This project is a scalable, modular flight booking system built using Spring Boo
 - Restricted to `ROLE_ADMIN` for flight management.
 - Exposes endpoints for CRUD operations on flights and seats.
 
-## Kafka Integration
+### Kafka Integration
 - **Producer** publishes booking events (`BOOKING_CREATED`, `BOOKING_DELETED`)
 - **Consumer** listens and sends email notifications via `JavaMailSender`
 
-## Resilience, Error Handling & Code Quality
+### Resilience, Error Handling & Code Quality
 
 - **Circuit Breaker**: Isolates failures and ensures graceful fallback in case of service downtime.  
 - **Global Exception Handling**: Provides consistent validation error responses across all services.  
 - **Code Quality**: Enforced with **SonarQube** analysis for coverage, bug detection, and maintainability.
 
-
-### Infrastructure
-- **MongoDB**: Data persistence for Auth, Booking, Flight.
-- **Config Server**: Centralized configuration ([GitHub Repo](https://github.com/Pranitha161/flightbookingsystem-config-server))
-- **Eureka Server**: Service discovery.
-- **Kafka Broker + Zookeeper**: Event streaming backbone.
-
----
-
-## Security
+### Security
 - JWT-based authentication.
 - Role-based access enforced at Gateway and service level.
 
----
-## Docker & Docker Compose
+### Docker & Docker Compose
 
 - **Dockerfiles**: Each microservice (User/Auth, Flight, Booking, Gateway, Config, Eureka) has its own `Dockerfile` for containerization.
 - **Docker Compose**: A single `docker-compose.yml` orchestrates all services together, ensuring:
@@ -64,6 +53,16 @@ This project is a scalable, modular flight booking system built using Spring Boo
   - Dependency management (Config Server → Eureka → Services → Gateway)
   - Kafka + Zookeeper containers for event streaming
   - MongoDB containers for persistence
+
+---
+
+## Infrastructure
+- **MongoDB**: Data persistence for Auth, Booking, Flight.
+- **Config Server**: Centralized configuration ([Config-Server](https://github.com/Pranitha161/flightbookingsystem-config-server))
+- **Eureka Server**: Service discovery.
+- **Kafka Broker + Zookeeper**: Event streaming backbone.
+- **API Gateway (Spring Cloud Gateway)**: Single entry point for routing requests, JWT validation, and traffic control.
+- **Spring Security + JWT**: Authentication and role-based access control (RBAC) enforced across services.
 
 ---
 
