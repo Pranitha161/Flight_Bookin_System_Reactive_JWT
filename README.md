@@ -66,7 +66,7 @@ This project is a scalable, modular flight booking system built using Spring Boo
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Spring Boot (WebFlux)** – Reactive REST APIs  
 - **Spring Cloud Config Server** – centralized configuration  
 - **Spring Cloud Gateway** – API Gateway  
